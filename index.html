@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marcus · SiGeS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#F0EFF8;min-height:100vh;display:flex;flex-direction:column;}
+
+/* TOPBAR */
+.topbar{height:50px;background:#fff;border-bottom:1px solid #E8E6F4;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;z-index:10;position:relative;}
+.topbar-logo{display:flex;align-items:center;gap:8px;}
+.logo-text{font-size:18px;font-weight:700;color:#9B59B6;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.consultorio-sel{border:1px solid #E8E6F4;border-radius:8px;padding:5px 10px;font-size:13px;font-family:'DM Sans',sans-serif;color:#555;background:#fff;outline:none;}
+.user-pill{display:flex;align-items:center;gap:7px;background:#F5F3FB;border-radius:20px;padding:4px 12px 4px 4px;}
+.user-av{width:28px;height:28px;border-radius:50%;background:#9B59B6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;}
+.user-name{font-size:13px;font-weight:500;color:#333;}
+
+/* APP BODY */
+.app-body{display:flex;flex:1;overflow:hidden;}
+.sidebar{width:56px;background:#20B2A0;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:6px;flex-shrink:0;}
+.s-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;}
+.s-icon:hover,.s-icon.active{background:rgba(255,255,255,0.22);}
+.s-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+/* CONTENT */
+.content-area{flex:1;display:flex;align-items:center;justify-content:center;overflow-y:auto;}
+
+/* SELECTOR */
+.selector-box{background:#fff;border:1px solid #E8E6F4;border-radius:14px;padding:28px;width:440px;box-shadow:0 4px 20px rgba(155,89,182,0.08);}
+.selector-box h2{font-size:17px;font-weight:600;color:#2C2C5A;margin-bottom:6px;}
+.selector-box p{font-size:13px;color:#999;margin-bottom:22px;line-height:1.5;}
+.pac-card{display:flex;align-items:center;gap:12px;background:#F7F5FC;border-radius:10px;padding:12px;margin-bottom:18px;border:1px solid #EDE9F8;}
+.pac-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#9B59B6,#20B2A0);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+.pac-name{font-size:14px;font-weight:600;color:#2C2C5A;}
+.pac-meta{font-size:12px;color:#999;margin-top:2px;}
+.sel-lbl{font-size:11px;font-weight:600;color:#9B59B6;letter-spacing:.05em;margin-bottom:6px;}
+.motivo-sel{width:100%;border:1px solid #E0DCF5;border-radius:8px;padding:10px 12px;font-size:14px;font-family:'DM Sans',sans-serif;color:#333;background:#fff;outline:none;cursor:pointer;}
+.motivo-sel:focus{border-color:#9B59B6;}
+.btn-start{width:100%;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;background:#9B59B6;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:14px;transition:background .15s;}
+.btn-start:hover{background:#7D3C98;}
+
+/* ══════════════════════════════
+   ATENCION VIEW — fullscreen dentro del app
+   ══════════════════════════════ */
+.atencion-view{display:none;flex:1;flex-direction:column;overflow:hidden;background:#fff;}
+
+/* ATENCION HEAD */
+.aten-head{padding:14px 20px;border-bottom:1px solid #EDEBF8;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.aten-patient{font-size:19px;font-weight:600;color:#2C2C5A;}
+.aten-patient span{color:#9B59B6;margin:0 6px;}
+.aten-acts{display:flex;gap:8px;align-items:center;}
+.btn-fin{background:#9B59B6;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-fin:hover{background:#7D3C98;}
+.btn-3dots{width:32px;height:32px;border:1px solid #E8E6F4;border-radius:8px;background:#fff;cursor:pointer;color:#888;font-size:18px;display:flex;align-items:center;justify-content:center;}
+
+/* ATENCION BODY */
+.aten-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+/* NOTA — ocupa todo el lado izquierdo */
+.nota-side{width:340px;flex-shrink:0;border-right:1px solid #EDEBF8;display:flex;flex-direction:column;position:relative;}
+.nota-title{padding:12px 14px 6px;font-size:13px;font-weight:600;color:#2C2C5A;}
+.nota-ta{flex:1;border:none;outline:none;padding:8px 14px 14px;font-size:13px;font-family:'DM Sans',sans-serif;color:#333;line-height:1.7;resize:none;min-height:0;}
+.nota-ta::placeholder{color:#C8C5DC;}
+
+/* ZONA MARCUS — aparece debajo de la nota cuando hay contenido */
+.nota-marcus-zone{display:none;flex-direction:column;border-top:2px solid #9B59B6;flex-shrink:0;}
+.mz-head{background:#9B59B6;padding:4px 12px;font-size:10px;font-weight:600;color:#fff;letter-spacing:.05em;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.mz-dot{width:6px;height:6px;border-radius:50%;background:#2ECC71;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.mz-text{padding:10px 14px;font-size:13px;color:#6C3483;line-height:1.7;overflow-y:auto;background:#FBF8FF;max-height:180px;font-style:italic;}
+.mz-actions{display:flex;gap:6px;padding:8px 12px;border-top:1px solid #EDE9F8;background:#FBF8FF;flex-shrink:0;}
+.btn-usar-nota{flex:1;border:none;border-radius:7px;padding:7px;font-size:12px;font-weight:600;background:#9B59B6;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-usar-nota:hover{background:#7D3C98;}
+.btn-descartar{border:1px solid #EDE9F8;border-radius:7px;padding:7px 10px;font-size:12px;background:#fff;color:#999;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* RIGHT PANEL */
+.right-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.tabs{display:flex;border-bottom:1px solid #EDEBF8;padding:0 14px;flex-shrink:0;overflow-x:auto;}
+.tab{padding:11px 12px;font-size:11px;font-weight:600;color:#ADADC8;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:color .15s;letter-spacing:.03em;}
+.tab:hover{color:#9B59B6;}
+.tab.active{color:#9B59B6;border-bottom-color:#9B59B6;}
+.tab svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.tab-body{flex:1;overflow-y:auto;}
+.pane{display:none;padding:16px;}
+.pane.active{display:block;}
+
+/* CONSTANTES */
+.const-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.cf{display:flex;flex-direction:column;gap:4px;}
+.cf-prev{font-size:10px;color:#C0BDD4;}
+.cf-box{border:1px solid #E8E6F4;border-radius:8px;padding:8px 10px;font-size:13px;display:flex;align-items:center;justify-content:space-between;background:#fff;}
+.cf-box input{border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:#333;width:70px;background:transparent;}
+.cf-unit{font-size:11px;color:#C0BDD4;}
+
+/* FOOTER */
+.aten-footer{padding:11px 20px;border-top:1px solid #EDEBF8;background:#FAFAFA;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative;}
+.f-left{display:flex;align-items:center;gap:10px;}
+.f-arrow{width:26px;height:26px;border:1px solid #E8E6F4;border-radius:7px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#888;font-size:14px;}
+.f-date{font-size:13px;font-weight:600;color:#333;}
+.f-service{font-size:13px;color:#9B59B6;font-weight:500;}
+.f-motivo{font-size:13px;color:#666;}
+.f-motivo strong{color:#333;}
+.f-right{display:flex;align-items:center;gap:8px;}
+.status-chip{background:#EDE9F8;color:#9B59B6;font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;}
+.btn-cancel{border:1px solid #E8E6F4;border-radius:8px;padding:7px 16px;font-size:13px;background:#fff;color:#888;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-save{border:none;border-radius:8px;padding:7px 18px;font-size:13px;font-weight:600;background:#9B59B6;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-save:hover{background:#7D3C98;}
+
+/* MARCUS FAB — flota arriba del guardar */
+.marcus-fab{position:absolute;bottom:56px;right:20px;background:#9B59B6;border:none;border-radius:24px;padding:8px 14px 8px 10px;display:flex;align-items:center;gap:7px;cursor:pointer;box-shadow:0 4px 16px rgba(155,89,182,0.45);transition:transform .15s,box-shadow .15s;z-index:50;font-family:'DM Sans',sans-serif;}
+.marcus-fab:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(155,89,182,0.5);}
+.marcus-fab svg{width:22px;height:22px;}
+.marcus-fab-label{font-size:12px;font-weight:600;color:#fff;}
+.fab-badge{width:8px;height:8px;border-radius:50%;background:#2ECC71;border:2px solid #9B59B6;}
+
+/* MARCUS PANEL — flotante sobre el footer */
+.marcus-panel{position:absolute;right:16px;bottom:62px;width:235px;background:#fff;border:1px solid #E0DCF5;border-radius:12px;box-shadow:0 -6px 30px rgba(0,0,0,0.13);z-index:49;transform:translateY(12px);opacity:0;pointer-events:none;transition:all .22s cubic-bezier(.4,0,.2,1);}
+.marcus-panel.abierto{transform:translateY(0);opacity:1;pointer-events:all;}
+.m-head{background:#9B59B6;padding:9px 12px;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:8px;}
+.m-av{width:26px;height:26px;border-radius:50%;background:#20B2A0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.m-name{font-size:13px;font-weight:600;color:#fff;}
+.m-sub{font-size:10px;color:rgba(255,255,255,.6);margin-top:1px;}
+.m-close{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.8);cursor:pointer;font-size:20px;line-height:1;padding:0;}
+.m-body{padding:10px;display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;scrollbar-width:none;}
+.m-body::-webkit-scrollbar{display:none;}
+.motivo-chip{background:#F7F5FC;border:1px solid #EDE9F8;border-radius:8px;padding:6px 10px;}
+.motivo-chip-lbl{font-size:9px;color:#9B59B6;font-weight:600;letter-spacing:.05em;}
+.motivo-chip-val{font-size:12px;font-weight:600;color:#2C2C5A;margin-top:2px;}
+.prog-wrap{display:flex;flex-direction:column;gap:3px;}
+.prog-bar{height:3px;background:#EDE9F8;border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:#20B2A0;border-radius:2px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+.prog-lbl{font-size:10px;color:#ADADC8;}
+.chat{display:flex;flex-direction:column;gap:6px;}
+.bq{background:#9B59B6;border-radius:4px 12px 12px 12px;padding:7px 10px;font-size:12px;color:#fff;line-height:1.45;align-self:flex-end;max-width:96%;animation:pop .15s ease;}
+.bu{background:#20B2A0;border-radius:12px 4px 12px 12px;padding:6px 10px;font-size:12px;color:#fff;line-height:1.45;align-self:flex-start;max-width:90%;animation:pop .15s ease;}
+@keyframes pop{from{opacity:0;transform:scale(.93) translateY(4px);}to{opacity:1;transform:none;}}
+.ops-col{display:flex;flex-direction:column;gap:4px;width:100%;animation:pop .15s ease;}
+.op{border:1px solid rgba(32,178,160,.3);border-radius:12px 3px 12px 12px;padding:5px 10px;font-size:11px;color:#0F7A6E;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;line-height:1.35;transition:all .12s;font-weight:500;}
+.op:hover{background:#E1F5EE;border-color:#20B2A0;}
+.op:disabled{opacity:.4;cursor:default;}
+.op.otro{border-style:dashed;color:#C0BDD4;border-color:#E0DCF5;font-weight:400;}
+.op.otro:hover{background:#F7F5FC;color:#888;}
+.sino-row{display:flex;gap:6px;animation:pop .15s ease;}
+.bsi{flex:1;border:none;border-radius:10px;padding:7px;font-size:12px;font-weight:600;background:#20B2A0;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.bsi:hover{background:#0F7A6E;}
+.bno{flex:1;border:1px solid #EDE9F8;border-radius:10px;padding:7px;font-size:12px;background:#fff;color:#999;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.bno:hover{background:#F7F5FC;}
+.otro-row{display:flex;gap:5px;animation:pop .15s ease;}
+.otro-inp{flex:1;border:1px solid rgba(32,178,160,.35);border-radius:8px;padding:6px 9px;font-size:12px;font-family:'DM Sans',sans-serif;color:#333;background:#fff;outline:none;}
+.otro-inp:focus{border-color:#20B2A0;}
+.otro-ok{border:none;border-radius:8px;padding:6px 10px;font-size:12px;background:#9B59B6;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;}
+.med-inp{width:100%;border:1px solid rgba(32,178,160,.35);border-radius:8px;padding:7px 10px;font-size:12px;font-family:'DM Sans',sans-serif;color:#333;background:#fff;outline:none;animation:pop .15s ease;}
+.med-inp:focus{border-color:#20B2A0;}
+.med-ok{width:100%;border:none;border-radius:8px;padding:7px;font-size:12px;font-weight:600;background:#9B59B6;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:5px;animation:pop .15s ease;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+      <path d="M20 4L8 12V22C8 29.7 13.3 36.2 20 38C26.7 36.2 32 29.7 32 22V12L20 4Z" fill="#20B2A0" opacity=".15"/>
+      <path d="M20 7L10 14V22C10 27.9 14.4 33.3 20 35C25.6 33.3 30 27.9 30 22V14L20 7Z" stroke="#9B59B6" stroke-width="1.5" fill="none"/>
+      <path d="M20 15V25M15 20H25" stroke="#9B59B6" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span class="logo-text">SiGeS</span>
+  </div>
+  <div class="topbar-right">
+    <select class="consultorio-sel"><option>Consultorio 1</option><option>Guardia</option><option>Consultorio 2</option></select>
+    <div class="user-pill">
+      <div class="user-av">FG</div>
+      <span class="user-name">Francisco Galmes</span>
+    </div>
+  </div>
+</div>
+
+<div class="app-body">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="s-icon active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <div class="s-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg></div>
+    <div class="s-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+    <div class="s-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    <div class="s-icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+    <div class="s-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 4v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+    <div class="s-icon"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg></div>
+  </div>
+
+  <!-- SELECTOR (pantalla inicial) -->
+  <div class="content-area" id="contentArea">
+    <div class="selector-box">
+      <h2>Iniciar atención con Marcus</h2>
+      <p>Seleccioná el motivo de consulta. Marcus te guiará con preguntas y generará la nota evolutiva automáticamente.</p>
+      <div class="pac-card">
+        <div class="pac-av">GF</div>
+        <div>
+          <div class="pac-name">Galmes, Francisco</div>
+          <div class="pac-meta">27 años · Masculino · DNI 41599818 · OMINT</div>
+        </div>
+      </div>
+      <div class="sel-lbl">MOTIVO DE CONSULTA</div>
+      <select class="motivo-sel" id="motivoSelect">
+        <option value="">— Seleccioná un motivo —</option>
+        <option>DOLOR ABDOMINAL</option><option>DOLOR DE CABEZA</option><option>CEFALEA</option>
+        <option>MIGRAÑA</option><option>FIEBRE</option><option>VOMITO</option><option>DIARREA</option>
+        <option>DOLOR DE GARGANTA</option><option>DOLOR DE PECHO</option><option>DOLOR LUMBAR</option>
+        <option>LUMBALGIA</option><option>HIPERTENSION</option><option>TENSION ALTA</option>
+        <option>MAREOS</option><option>VERTIGO</option><option>NAUSEAS</option>
+        <option>CONSTIPACION</option><option>DIFICULTAD RESPIRATORIA</option>
+        <option>COLICO ABDOMINAL</option><option>COLICO RENAL</option><option>COLICO BILIAR</option>
+        <option>ARDOR ESTOMACAL</option><option>GASTRITIS</option><option>CISTITIS</option>
+        <option>INFECCION URINARIA</option><option>ARDOR AL ORINAR</option>
+        <option>CAIDA / GOLPE</option><option>HERIDA</option><option>QUEMADURA</option>
+        <option>CONTRACTURA MUSCULAR</option><option>CERVICALGIA</option><option>CIATICO</option>
+        <option>ARRITMIA</option><option>TAQUICARDIA</option><option>PALPITACIONES</option>
+        <option>CONVULSION</option><option>ALERGIA</option><option>REACCION ALERGICA</option>
+        <option>ASMA</option><option>DECAIMIENTO</option><option>MALESTAR GENERAL</option>
+        <option>DESHIDRATACION</option><option>HIPOGLUCEMIA</option><option>CRISIS DE ANGUSTIA</option>
+        <option>ABSCESO</option><option>ADORMECIMIENTO DE CARA</option>
+        <option>ADORMECIMIENTO DE MIEMBROS</option><option>AGITACION</option>
+        <option>ALCOHOLIZADA/O</option><option>CONTROL DE SALUD</option>
+        <option>ACCIDENTE</option><option>ACCIDENTE DOMESTICO</option><option>ACCIDENTE VIA PUBLICA</option>
+      </select>
+      <button class="btn-start" onclick="iniciarAtencion()">Iniciar atención →</button>
+    </div>
+  </div>
+
+  <!-- ATENCION VIEW — fullscreen dentro del app (reemplaza el content-area) -->
+  <div class="atencion-view" id="atencionView">
+
+    <!-- HEAD -->
+    <div class="aten-head">
+      <div class="aten-patient">Galmes Francisco <span>|</span> 27 Años <span>|</span> 41599818</div>
+      <div class="aten-acts">
+        <button class="btn-fin" onclick="cerrar()">FINALIZAR ATENCIÓN</button>
+        <button class="btn-3dots">⋮</button>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="aten-body">
+
+      <!-- NOTA IZQUIERDA -->
+      <div class="nota-side">
+        <div class="nota-title">Nota evolutiva</div>
+        <textarea class="nota-ta" id="notaText" placeholder="Nota"></textarea>
+        <!-- ZONA MARCUS -->
+        <div class="nota-marcus-zone" id="marcusZone">
+          <div class="mz-head"><div class="mz-dot"></div>MARCUS — Nota generada</div>
+          <div class="mz-text" id="marcusZoneText"></div>
+          <div class="mz-actions">
+            <button class="btn-usar-nota" onclick="usarNota()">Usar esta nota</button>
+            <button class="btn-descartar" onclick="descartarNota()">Descartar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+        <div class="tabs">
+          <div class="tab active" onclick="setTab(event,'constantes')">
+            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>CONSTANTES
+          </div>
+          <div class="tab" onclick="setTab(event,'diag')">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>DIAGNÓSTICOS Y PROCEDIMIENTOS
+          </div>
+          <div class="tab" onclick="setTab(event,'adj')">
+            <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>ADJUNTOS
+          </div>
+          <div class="tab" onclick="setTab(event,'ind')">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>INDICACIONES Y PRESCRIPCIONES
+          </div>
+        </div>
+        <div class="tab-body">
+          <div class="pane active" id="pane-constantes">
+            <div class="const-grid">
+              <div class="cf"><div class="cf-prev">21/04/2026: 123 mmHg</div><div class="cf-box"><span>TA Sistólica</span><input type="number" placeholder=""><span class="cf-unit">mmHg</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 33 %</div><div class="cf-box"><span>Saturación O2</span><input type="number" placeholder=""><span class="cf-unit">%</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 170 cm.</div><div class="cf-box"><span>Talla</span><input type="number" placeholder=""><span class="cf-unit">cm.</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 131 mmHg</div><div class="cf-box"><span>TA Diastólica</span><input type="number" placeholder=""><span class="cf-unit">mmHg</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 36.5 °C</div><div class="cf-box"><span>Temperatura</span><input type="number" placeholder=""><span class="cf-unit">°C</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 25.41 kg/m²</div><div class="cf-box"><span>IMC</span><input type="number" placeholder=""><span class="cf-unit">kg/m²</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 72 ppm.</div><div class="cf-box"><span>Frec. Cardíaca</span><input type="number" placeholder=""><span class="cf-unit">ppm.</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 90 mg/dl</div><div class="cf-box"><span>Glucemia</span><input type="number" placeholder=""><span class="cf-unit">mg/dl</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 80 cm.</div><div class="cf-box"><span>Circ. Abdominal</span><input type="number" placeholder=""><span class="cf-unit">cm.</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 16 rpm.</div><div class="cf-box"><span>Frec. Respirat.</span><input type="number" placeholder=""><span class="cf-unit">rpm.</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 75 kg.</div><div class="cf-box"><span>Peso</span><input type="number" placeholder=""><span class="cf-unit">kg.</span></div></div>
+              <div class="cf"><div class="cf-prev">21/04/2026: 56 cm.</div><div class="cf-box"><span>Perímetro Cef.</span><input type="number" placeholder=""><span class="cf-unit">cm.</span></div></div>
+            </div>
+          </div>
+          <div class="pane" id="pane-diag" style="color:#C0BDD4;font-size:13px;padding:20px;">Diagnósticos y procedimientos</div>
+          <div class="pane" id="pane-adj" style="color:#C0BDD4;font-size:13px;padding:20px;">Adjuntos</div>
+          <div class="pane" id="pane-ind" style="color:#C0BDD4;font-size:13px;padding:20px;">Indicaciones y prescripciones</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="aten-footer">
+      <div class="f-left">
+        <div class="f-arrow">›</div>
+        <span class="f-date" id="fDate"></span>
+        <span class="f-service">Guardia Médica</span>
+      </div>
+      <div class="f-motivo">Motivo: <strong id="fMotivo">—</strong></div>
+      <div class="f-right">
+        <div class="status-chip">En consultorio</div>
+        <button class="btn-cancel" onclick="cerrar()">CANCELAR</button>
+        <button class="btn-save">GUARDAR ✓</button>
+      </div>
+
+      <!-- MARCUS FAB -->
+      <button class="marcus-fab" id="marcusFab" onclick="toggleMarcus()">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="8" r="3.5" fill="rgba(255,255,255,0.95)"/>
+          <path d="M6.5 20c0-3 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5" stroke="rgba(255,255,255,0.95)" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+          <path d="M9.5 10.5c0 1.4 1.1 2.5 2.5 2.5" stroke="#20B2A0" stroke-width="1.3" stroke-linecap="round"/>
+          <circle cx="12" cy="13.5" r="0.9" fill="#20B2A0"/>
+        </svg>
+        <span class="marcus-fab-label">Marcus</span>
+        <div class="fab-badge"></div>
+      </button>
+
+      <!-- MARCUS PANEL -->
+      <div class="marcus-panel" id="marcusPanel">
+        <div class="m-head">
+          <div class="m-av">M</div>
+          <div><div class="m-name">Marcus</div><div class="m-sub">Asistente clínico · SiGeS</div></div>
+          <button class="m-close" onclick="toggleMarcus()">×</button>
+        </div>
+        <div class="m-body" id="mBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ BASE DE MOTIVOS ══ */
+const DB = {
+  "DOLOR ABDOMINAL":{
+    pq:[
+      {p:"¿Dónde duele?",ops:["Epigastrio","Fosa ilíaca derecha","Fosa ilíaca izquierda","Difuso"]},
+      {p:"¿Cómo es el dolor?",ops:["Cólico","Punzante","Sordo / constante","Ardor"]},
+      {p:"¿Intensidad?",ops:["Leve (1-3)","Moderado (4-6)","Intenso (7-8)","Muy intenso (9-10)"]},
+      {p:"¿Cuándo empezó?",ops:["Menos de 6hs","6 a 24hs","1 a 3 días","Más de 3 días"]},
+      {p:"¿Irradia a alguna zona?",ops:["No irradia","A la espalda","Al hombro","A la ingle"]},
+      {p:"¿Algo lo modifica?",ops:["Empeora con comida","Mejora con comida","Empeora al moverse","No cambia"]},
+      {p:"¿Náuseas o vómitos?",ops:["No","Solo náuseas","Vómitos","Vómitos a repetición"]},
+      {p:"¿Tránsito intestinal?",ops:["Normal","Diarrea","Constipación","Alternancia"]},
+      {p:"¿Fiebre?",ops:["No","Febrícula","Fiebre alta"]},
+      {p:"¿Antecedentes?",ops:["Ninguno","Cirugías previas","Patología digestiva","AINE / corticoides"]}
+    ],
+    recs:["reposo","med","dieta","estudios","derivacion"],
+    nota: r => {
+      const partes = [];
+      partes.push(`El paciente Galmes Francisco concurre a la consulta por dolor abdominal localizado en ${r[0].toLowerCase()}.`);
+      partes.push(`Dolor de carácter ${r[1].toLowerCase()}, intensidad ${r[2].toLowerCase()}.`);
+      partes.push(`Inicio ${r[3].toLowerCase()}.`);
+      partes.push(r[4] === "No irradia" ? "Sin irradiación." : `Irradia ${r[4].toLowerCase()}.`);
+      partes.push(`${r[5]}.`);
+      partes.push(r[6] === "No" ? "Niega náuseas ni vómitos." : `Presenta ${r[6].toLowerCase()}.`);
+      partes.push(r[7] === "Normal" ? "Tránsito conservado." : `${r[7]}.`);
+      partes.push(r[8] === "No" ? "Afebril." : `${r[8]}.`);
+      partes.push(r[9] === "Ninguno" ? "Sin antecedentes relevantes." : `Antecedentes: ${r[9].toLowerCase()}.`);
+      return partes.join(' ');
+    }
+  },
+  "FIEBRE":{
+    pq:[
+      {p:"¿Cuánta fiebre?",ops:["37.5-38°","38-39°","Más de 39°","No la midió"]},
+      {p:"¿Hace cuánto?",ops:["Horas","1 día","2 a 3 días","Más de 3 días"]},
+      {p:"¿Escalofríos?",ops:["No","Leves","Intensos"]},
+      {p:"¿Síntomas acompañantes?",ops:["Solo fiebre","Dolor de garganta","Respiratorios","Digestivos"]},
+      {p:"¿Tomó antitérmico?",ops:["No","Sí, bajó","Sí, no bajó"]}
+    ],
+    recs:["med","dieta","hidratacion","estudios"],
+    nota: r => `El paciente Galmes Francisco concurre por fiebre de ${r[0].toLowerCase()}, de ${r[1]} de evolución. Escalofríos: ${r[2].toLowerCase()}. Síntomas asociados: ${r[3].toLowerCase()}. Respuesta a antitérmicos: ${r[4].toLowerCase()}.`
+  },
+  "DOLOR DE CABEZA":{
+    pq:[
+      {p:"¿Dónde?",ops:["Frontal","Occipital","Hemicránea","Generalizado"]},
+      {p:"¿Cómo es?",ops:["Pulsátil","Opresivo","Punzante","En relámpago"]},
+      {p:"¿Síntomas asociados?",ops:["No","Náuseas","Vómitos","Fotofobia"]},
+      {p:"¿Cuánto lleva?",ops:["Menos de 1 hora","Horas","Días"]},
+      {p:"¿Fiebre o rigidez de nuca?",ops:["No","Fiebre","Rigidez de nuca","Ambas"]}
+    ],
+    recs:["reposo","med","estudios","derivacion"],
+    nota: r => `El paciente Galmes Francisco consulta por cefalea en región ${r[0].toLowerCase()}, carácter ${r[1].toLowerCase()}. Síntomas asociados: ${r[2].toLowerCase()}. Evolución: ${r[3]}. Fiebre/rigidez: ${r[4].toLowerCase()}.`
+  },
+  "CEFALEA":{
+    pq:[
+      {p:"¿Dónde?",ops:["Frontal","Occipital","Hemicránea","Generalizado"]},
+      {p:"¿Cómo es?",ops:["Pulsátil","Opresivo","Punzante","En relámpago"]},
+      {p:"¿Síntomas asociados?",ops:["No","Náuseas","Vómitos","Fotofobia"]},
+      {p:"¿Cuánto lleva?",ops:["Menos de 1 hora","Horas","Días"]},
+      {p:"¿Fiebre o rigidez de nuca?",ops:["No","Fiebre","Rigidez de nuca","Ambas"]}
+    ],
+    recs:["reposo","med","estudios","derivacion"],
+    nota: r => `El paciente Galmes Francisco consulta por cefalea en región ${r[0].toLowerCase()}, carácter ${r[1].toLowerCase()}. Síntomas asociados: ${r[2].toLowerCase()}. Evolución: ${r[3]}. Fiebre/rigidez: ${r[4].toLowerCase()}.`
+  },
+  "VOMITO":{
+    pq:[
+      {p:"¿Frecuencia?",ops:["1 a 2 veces","3 a 5 veces","Más de 5 veces"]},
+      {p:"¿Diarrea también?",ops:["No","Leve","Intensa"]},
+      {p:"¿Dolor abdominal?",ops:["No","Leve","Intenso"]},
+      {p:"¿Fiebre?",ops:["No","Sí"]},
+      {p:"¿Tolera líquidos?",ops:["Sí","Con dificultad","No tolera nada"]}
+    ],
+    recs:["med","hidratacion","dieta","estudios"],
+    nota: r => `El paciente Galmes Francisco consulta por vómitos (${r[0]}). Diarrea: ${r[1].toLowerCase()}. Dolor abdominal: ${r[2].toLowerCase()}. Fiebre: ${r[3].toLowerCase()}. Tolerancia oral: ${r[4].toLowerCase()}.`
+  },
+  "DIARREA":{
+    pq:[
+      {p:"¿Deposiciones por día?",ops:["2 a 4","5 a 7","Más de 7"]},
+      {p:"¿Sangre o moco?",ops:["No","Moco","Sangre","Sangre y moco"]},
+      {p:"¿Fiebre?",ops:["No","Febrícula","Fiebre alta"]},
+      {p:"¿Vómitos?",ops:["No","Ocasionales","A repetición"]},
+      {p:"¿Cuánto lleva?",ops:["Menos de 24hs","1 a 3 días","Más de 3 días"]}
+    ],
+    recs:["med","hidratacion","dieta","estudios"],
+    nota: r => `El paciente Galmes Francisco consulta por diarrea con ${r[0]} deposiciones diarias. Características: ${r[1].toLowerCase()}. Fiebre: ${r[2].toLowerCase()}. Vómitos: ${r[3].toLowerCase()}. Evolución: ${r[4]}.`
+  },
+  "DOLOR DE GARGANTA":{
+    pq:[
+      {p:"¿Dificultad para tragar?",ops:["No","Leve","Intensa"]},
+      {p:"¿Fiebre?",ops:["No","Febrícula","Fiebre alta"]},
+      {p:"¿Placas?",ops:["No","Sí"]},
+      {p:"¿Tos?",ops:["No","Seca","Con flema"]},
+      {p:"¿Cuánto lleva?",ops:["1 día","2-4 días","Más de 4 días"]}
+    ],
+    recs:["med","hidratacion","estudios"],
+    nota: r => `El paciente Galmes Francisco consulta por odinofagia, dificultad para deglutir ${r[0].toLowerCase()}. Fiebre: ${r[1].toLowerCase()}. Exudado: ${r[2].toLowerCase()}. Tos: ${r[3].toLowerCase()}. Evolución: ${r[4]}.`
+  },
+  "DOLOR DE PECHO":{
+    pq:[
+      {p:"¿Cómo es el dolor?",ops:["Opresivo","Punzante","Ardor","Con la respiración"]},
+      {p:"¿Irradia?",ops:["No","Al brazo izquierdo","A la mandíbula","A la espalda"]},
+      {p:"¿Sudoración o palidez?",ops:["No","Sí"]},
+      {p:"¿Cuánto lleva?",ops:["Minutos","Menos de 1 hora","Horas"]},
+      {p:"¿Antecedentes cardíacos?",ops:["No","HTA","Infarto previo","Cardiopatía"]}
+    ],
+    recs:["derivacion","estudios","med"],
+    nota: r => `El paciente Galmes Francisco consulta por dolor precordial ${r[0].toLowerCase()}, irradiación ${r[1].toLowerCase()}. Síntomas vegetativos: ${r[2].toLowerCase()}. Duración: ${r[3]}. Antecedentes: ${r[4].toLowerCase()}.`
+  },
+  "DOLOR LUMBAR":{
+    pq:[
+      {p:"¿Solo lumbar o irradia?",ops:["Solo lumbar","Al glúteo","A la rodilla","Al pie"]},
+      {p:"¿Cuándo empezó?",ops:["Tras un esfuerzo","Al despertar","Sin causa clara"]},
+      {p:"¿Empeora con movimiento?",ops:["Sí","No cambia","Mejora"]},
+      {p:"¿Adormecimiento?",ops:["No","Leve","Intenso"]},
+      {p:"¿Cuánto lleva?",ops:["Menos de 48hs","3 a 7 días","Más de 1 semana"]}
+    ],
+    recs:["reposo","med","estudios"],
+    nota: r => `El paciente Galmes Francisco consulta por lumbalgia que ${r[0].toLowerCase()}. Inicio: ${r[1].toLowerCase()}. Movimiento: ${r[2].toLowerCase()}. Parestesias: ${r[3].toLowerCase()}. Evolución: ${r[4]}.`
+  },
+  "HIPERTENSION":{
+    pq:[
+      {p:"¿TA actual?",ops:["140-160/90-100","160-180/100-110","Mayor a 180/110","No medida"]},
+      {p:"¿Síntomas?",ops:["Asintomático","Cefalea","Mareos","Visión borrosa"]},
+      {p:"¿Tratamiento?",ops:["Sí y lo toma","Sí pero no tomó","Sin tratamiento"]},
+      {p:"¿Dolor de pecho o disnea?",ops:["No","Sí"]},
+      {p:"¿ACV o IAM previo?",ops:["No","ACV previo","Infarto previo"]}
+    ],
+    recs:["med","estudios","derivacion"],
+    nota: r => `El paciente Galmes Francisco consulta por HTA, TA ${r[0]}. Síntomas: ${r[1].toLowerCase()}. Tratamiento: ${r[2].toLowerCase()}. Complicaciones: ${r[3].toLowerCase()}. Antecedentes: ${r[4].toLowerCase()}.`
+  },
+  "MAREOS":{
+    pq:[
+      {p:"¿Cómo describe el mareo?",ops:["Giro de objetos","Inestabilidad","Sensación de desmayo"]},
+      {p:"¿Con cambios de posición?",ops:["Sí, al levantarse","Al girar la cabeza","No tiene relación"]},
+      {p:"¿Náuseas o vómitos?",ops:["No","Náuseas","Vómitos"]},
+      {p:"¿Zumbido o hipoacusia?",ops:["No","Zumbido","Hipoacusia"]},
+      {p:"¿Antecedentes?",ops:["No","HTA","Neurológico","Otro"]}
+    ],
+    recs:["reposo","med","estudios"],
+    nota: r => `El paciente Galmes Francisco consulta por ${r[0].toLowerCase()}. Relación postural: ${r[1].toLowerCase()}. ${r[2].toLowerCase()}. Síntomas óticos: ${r[3].toLowerCase()}. Antecedentes: ${r[4].toLowerCase()}.`
+  },
+};
+
+const RECS_ALL = [
+  {key:'reposo', tipo:'horas', p:'¿Indicás reposo?', subs:['24 horas','48 horas','72 horas','1 semana']},
+  {key:'med',    tipo:'med',   p:'¿Indicás medicación?'},
+  {key:'dieta',  tipo:'sino',  p:'¿Dieta blanda?'},
+  {key:'hidratacion', tipo:'sino', p:'¿Indicás hidratación?'},
+  {key:'estudios',    tipo:'sino', p:'¿Pedís estudios complementarios?'},
+  {key:'derivacion',  tipo:'sino', p:'¿Derivás a especialista?'},
+];
+
+/* ══ ESTADO ══ */
+let paso=0, fase='anamnesis', resps=[], ri=0, recs={}, notaBase='';
+let motivoActual='', PQ=[], RECS=[], panelAbierto=false, notaGenerada='';
+
+const mBody          = document.getElementById('mBody');
+const notaText       = document.getElementById('notaText');
+const marcusZone     = document.getElementById('marcusZone');
+const marcusZoneText = document.getElementById('marcusZoneText');
+
+/* ══ HELPERS CHAT ══ */
+const scChat = () => { mBody.scrollTop = mBody.scrollHeight; };
+
+function bq(t) {
+  const d = document.createElement('div');
+  d.className = 'bq'; d.textContent = t;
+  mBody.appendChild(d); scChat();
+}
+function bu(t) {
+  const d = document.createElement('div');
+  d.className = 'bu'; d.textContent = t;
+  mBody.appendChild(d); scChat();
+}
+
+function mostrarOps(list, cb) {
+  const col = document.createElement('div');
+  col.className = 'ops-col';
+  list.forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'op'; b.textContent = o;
+    b.onclick = () => {
+      col.querySelectorAll('.op').forEach(x => x.disabled = true);
+      col.remove(); bu(o); cb(o);
+    };
+    col.appendChild(b);
+  });
+  // Botón otro
+  const ot = document.createElement('button');
+  ot.className = 'op otro'; ot.textContent = '+ Otro...';
+  ot.onclick = () => { col.remove(); otroInp(cb); };
+  col.appendChild(ot);
+  mBody.appendChild(col); scChat();
+}
+
+function otroInp(cb) {
+  const row = document.createElement('div'); row.className = 'otro-row';
+  const inp = document.createElement('input'); inp.className = 'otro-inp'; inp.placeholder = 'Escribí...';
+  const ok  = document.createElement('button'); ok.className = 'otro-ok'; ok.textContent = 'OK';
+  const go  = () => { if (!inp.value.trim()) return; row.remove(); bu(inp.value.trim()); cb(inp.value.trim()); };
+  ok.onclick = go; inp.onkeydown = e => { if (e.key === 'Enter') go(); };
+  row.appendChild(inp); row.appendChild(ok); mBody.appendChild(row); inp.focus(); scChat();
+}
+
+function sinoRow(cbSi, cbNo) {
+  const row = document.createElement('div'); row.className = 'sino-row';
+  const si  = document.createElement('button'); si.className = 'bsi'; si.textContent = 'Sí';
+  const no  = document.createElement('button'); no.className = 'bno'; no.textContent = 'No';
+  si.onclick = () => { row.remove(); bu('Sí'); cbSi(); };
+  no.onclick = () => { row.remove(); bu('No'); cbNo(); };
+  row.appendChild(si); row.appendChild(no); mBody.appendChild(row); scChat();
+}
+
+/* ══ NOTA — solo genera cuando hay suficientes respuestas ══ */
+function actualizarNota() {
+  const db = DB[motivoActual];
+  if (!db) return;
+
+  // Construir nota solo con las respuestas disponibles hasta ahora
+  // usando la misma lógica pero campo por campo
+  try {
+    // Llamar a la función nota solo con respuestas completas hasta la posición actual
+    notaGenerada = db.nota(resps);
+  } catch(e) {
+    // Si falla, armar nota parcial manual
+    notaGenerada = `El paciente Galmes Francisco concurre a la consulta por ${motivoActual.toLowerCase()}.`;
+    if (resps[0]) notaGenerada += ` ${resps[0]}.`;
+  }
+
+  // Mostrar zona marcus
+  marcusZone.style.display = 'flex';
+  marcusZoneText.textContent = notaGenerada;
+}
+
+function actualizarNotaConRecs() {
+  let n = notaBase;
+  const ls = [];
+  if (recs.reposo)     ls.push(`Reposo por ${recs.reposo}.`);
+  if (recs.med)        ls.push(`Medicación: ${recs.med}.`);
+  if (recs.dieta)      ls.push('Dieta blanda.');
+  if (recs.hidratacion)ls.push('Hidratación adecuada.');
+  if (recs.estudios)   ls.push('Se solicitan estudios complementarios.');
+  if (recs.derivacion) ls.push('Se deriva a especialista.');
+  notaGenerada = ls.length ? n + '\n\nIndicaciones: ' + ls.join(' ') : n;
+  marcusZoneText.textContent = notaGenerada;
+}
+
+/* ══ PROGRESO ══ */
+function progreso() {
+  const pf = document.getElementById('mpf');
+  const pl = document.getElementById('mpl');
+  if (!pf || !pl) return;
+  if (fase === 'anamnesis') {
+    pf.style.width = Math.round(paso / PQ.length * 100) + '%';
+    pl.textContent = `Pregunta ${paso} de ${PQ.length}`;
+  } else if (fase === 'recs') {
+    pf.style.width = '100%';
+    pl.textContent = `Indicaciones (${ri+1} de ${RECS.length})`;
+  } else {
+    pf.style.width = '100%';
+    pl.textContent = 'Nota completa ✓';
+  }
+}
+
+/* ══ FLUJO PREGUNTAS ══ */
+function sigPregunta() {
+  setTimeout(() => {
+    bq(PQ[paso].p);
+    mostrarOps(PQ[paso].ops, o => {
+      resps.push(o);
+      paso++;
+      progreso();
+
+      // Solo actualizar nota si tenemos todas las respuestas para ese motivo
+      // O si el motivo tiene función nota parcial
+      actualizarNota();
+
+      if (paso >= PQ.length) {
+        fase = 'recs';
+        notaBase = notaGenerada;
+        setTimeout(() => {
+          bq('Perfecto. ¿Qué indicaciones dás?');
+          setTimeout(sigRec, 300);
+        }, 500);
+      } else {
+        sigPregunta();
+      }
+    });
+  }, 260);
+}
+
+/* ══ FLUJO RECOMENDACIONES ══ */
+function sigRec() {
+  if (ri >= RECS.length) {
+    fase = 'fin'; progreso();
+    bq('Nota lista. Revisala y decidí si la usás.');
+    return;
+  }
+  progreso();
+  const rec = RECS[ri];
+  setTimeout(() => {
+    bq(rec.p);
+    if (rec.tipo === 'horas') {
+      sinoRow(
+        () => { bq('¿Cuánto tiempo?'); mostrarOps(rec.subs, s => { recs[rec.key]=s; actualizarNotaConRecs(); ri++; sigRec(); }); },
+        () => { ri++; sigRec(); }
+      );
+    } else if (rec.tipo === 'med') {
+      sinoRow(
+        () => {
+          bq('¿Cuál medicación?');
+          const inp = document.createElement('input'); inp.className = 'med-inp'; inp.placeholder = 'Ej: Ibuprofeno 400mg c/8hs';
+          const ok  = document.createElement('button'); ok.className = 'med-ok'; ok.textContent = 'Confirmar';
+          const go  = () => { if (!inp.value.trim()) return; inp.remove(); ok.remove(); bu(inp.value.trim()); recs[rec.key]=inp.value.trim(); actualizarNotaConRecs(); ri++; sigRec(); };
+          ok.onclick = go; inp.onkeydown = e => { if (e.key==='Enter') go(); };
+          mBody.appendChild(inp); mBody.appendChild(ok); inp.focus(); scChat();
+        },
+        () => { ri++; sigRec(); }
+      );
+    } else {
+      sinoRow(
+        () => { recs[rec.key]=true; actualizarNotaConRecs(); ri++; sigRec(); },
+        () => { ri++; sigRec(); }
+      );
+    }
+  }, 300);
+}
+
+/* ══ UI ══ */
+function toggleMarcus() {
+  panelAbierto = !panelAbierto;
+  document.getElementById('marcusPanel').classList.toggle('abierto', panelAbierto);
+}
+
+function setTab(e, name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(t => t.classList.remove('active'));
+  e.currentTarget.classList.add('active');
+  const p = document.getElementById('pane-' + name);
+  if (p) p.classList.add('active');
+}
+
+function usarNota() {
+  notaText.value = notaGenerada;
+  marcusZone.style.display = 'none';
+  panelAbierto = false;
+  document.getElementById('marcusPanel').classList.remove('abierto');
+}
+
+function descartarNota() {
+  marcusZone.style.display = 'none';
+}
+
+/* ══ INICIAR ══ */
+function iniciarAtencion() {
+  const sel = document.getElementById('motivoSelect').value;
+  if (!sel) { alert('Seleccioná un motivo de consulta.'); return; }
+
+  motivoActual = sel;
+  const db = DB[sel];
+
+  if (db) {
+    PQ   = db.pq;
+    RECS = RECS_ALL.filter(r => db.recs.includes(r.key));
+  } else {
+    PQ = [
+      {p:`¿Hace cuánto tiene ${sel.toLowerCase()}?`, ops:['Horas','1 día','2 a 3 días','Más de 3 días']},
+      {p:'¿Qué intensidad?',                          ops:['Leve','Moderada','Intensa']},
+      {p:'¿Síntomas acompañantes?',                   ops:['No','Fiebre','Dolor','Otros']},
+      {p:'¿Tomó alguna medicación?',                  ops:['No','Sí, mejoró','Sí, no mejoró']},
+      {p:'¿Antecedentes relevantes?',                 ops:['No','Sí, en tratamiento','Sin diagnóstico previo']},
+    ];
+    RECS = RECS_ALL;
+  }
+
+  // Reset estado
+  paso=0; fase='anamnesis'; resps=[]; ri=0; recs={}; notaBase=''; notaGenerada='';
+  notaText.value='';
+  marcusZone.style.display='none';
+  marcusZoneText.textContent='';
+  panelAbierto=false;
+
+  // Footer
+  const now = new Date();
+  document.getElementById('fDate').textContent =
+    now.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' +
+    now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}) + 'hs';
+  document.getElementById('fMotivo').textContent = sel;
+
+  // Mostrar vista atención (fullscreen dentro del app)
+  document.getElementById('contentArea').style.display = 'none';
+  const av = document.getElementById('atencionView');
+  av.style.display = 'flex';
+
+  // Armar body Marcus
+  mBody.innerHTML = `
+    <div class="motivo-chip">
+      <div class="motivo-chip-lbl">MOTIVO</div>
+      <div class="motivo-chip-val">${sel}</div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-bar"><div class="prog-fill" id="mpf" style="width:0%"></div></div>
+      <div class="prog-lbl" id="mpl">Pregunta 1 de ${PQ.length}</div>
+    </div>
+    <div class="chat"></div>
+  `;
+
+  // Redirigir bq/bu al div.chat del panel
+  const chatDiv = mBody.querySelector('.chat');
+  window._addBubble = (t, tipo) => {
+    const d = document.createElement('div');
+    d.className = tipo === 'bot' ? 'bq' : 'bu';
+    d.textContent = t;
+    chatDiv.appendChild(d);
+    mBody.scrollTop = mBody.scrollHeight;
+  };
+
+  setTimeout(() => {
+    bq('Hola. Te hago algunas preguntas para armar la nota.');
+    sigPregunta();
+  }, 300);
+}
+
+function cerrar() {
+  document.getElementById('atencionView').style.display = 'none';
+  document.getElementById('contentArea').style.display  = 'flex';
+  document.getElementById('motivoSelect').value = '';
+  panelAbierto = false;
+  document.getElementById('marcusPanel').classList.remove('abierto');
+}
+</script>
+</body>
+</html>
